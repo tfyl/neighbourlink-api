@@ -22,7 +22,12 @@ func (db *DB) GetCommentAll () ([]types.Comment, error) {
 
 	var comments []types.Comment
 
-	rows, err := db.Queryx(`
+	tx := db.MustBegin()
+	tx1 := db.MustBegin()
+	defer tx.Commit()
+	defer tx1.Commit()
+
+	rows, err := tx.Queryx(`
 	SELECT
 		comment_id,
 	    user_id,
@@ -43,7 +48,7 @@ func (db *DB) GetCommentAll () ([]types.Comment, error) {
 			fmt.Println(2)
 			return nil,err
 		}
-		err = db.QueryRowx(`
+		err = tx1.QueryRowx(`
 		SELECT
 			post_id
 		FROM
@@ -95,8 +100,7 @@ func (db *DB) GetCommentsByPost (post types.Post) ([]types.Comment, error) {
 
 func (db *DB) GetComment (comment types.Comment) (types.Comment, error) {
 
-	tx := db.MustBegin()
-	err := tx.Get(&comment, `
+	err := db.Get(&comment, `
 	SELECT
 		*  
 	FROM
@@ -105,10 +109,6 @@ func (db *DB) GetComment (comment types.Comment) (types.Comment, error) {
 		post_comment.comment_id=$1
 	;`, comment.CommentID)
 
-	if err != nil {
-		return comment,err
-	}
-	err = tx.Commit()
 
 	return comment,err
 

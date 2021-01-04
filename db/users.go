@@ -2,7 +2,7 @@ package db
 
 import "neighbourlink-api/types"
 
-func (db *DB) AddUser (user types.User) error {
+func (db *DB) AddUser (user types.User) (types.User, error) {
 
 	tx := db.MustBegin()
 	_ ,err  := tx.Exec(`
@@ -20,19 +20,18 @@ func (db *DB) AddUser (user types.User) error {
 		SELECT user_id, $5, $6 FROM ins2;
 	`,user.Username,user.Email,user.Password,user.Permissions,user.LocalArea,user.Reputation)
 	if err != nil {
-		return err
+		return user, err
 	}
 
 	err = tx.Commit()
-	return err
+	return user, err
 }
 
 
 
 func (db *DB) GetUserAll (user types.User) (types.User, error) {
 
-	tx := db.MustBegin()
-	err := tx.Get(&user, `
+	err := db.Get(&user, `
 	SELECT
 	       user_detail.user_id,
 	       user_detail.username,
@@ -51,7 +50,6 @@ func (db *DB) GetUserAll (user types.User) (types.User, error) {
 	if err != nil {
 		return user,err
 	}
-	err = tx.Commit()
 
 	return user,err
 
@@ -60,8 +58,8 @@ func (db *DB) GetUserAll (user types.User) (types.User, error) {
 
 func (db *DB) GetUserByID (user types.User) (types.User, error) {
 
-	tx := db.MustBegin()
-	err := tx.Get(&user, `
+
+	err := db.Get(&user, `
 	SELECT
 	       user_detail.user_id,
 	       user_detail.username,
@@ -85,7 +83,6 @@ func (db *DB) GetUserByID (user types.User) (types.User, error) {
 	if err != nil {
 		return user,err
 	}
-	err = tx.Commit()
 
 	return user,err
 
@@ -93,8 +90,7 @@ func (db *DB) GetUserByID (user types.User) (types.User, error) {
 
 func (db *DB) GetUserByUsername (user types.User) (types.User, error) {
 
-	tx := db.MustBegin()
-	err := tx.Get(&user, `
+	err := db.Get(&user, `
 	SELECT
 	       user_detail.user_id,
 	       user_detail.username,
@@ -118,7 +114,6 @@ func (db *DB) GetUserByUsername (user types.User) (types.User, error) {
 	if err != nil {
 		return user,err
 	}
-	err = tx.Commit()
 
 	return user,err
 

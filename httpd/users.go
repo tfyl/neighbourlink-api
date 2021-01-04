@@ -35,7 +35,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request, db *db.DB) {
 	u.Reputation = 0
 	u.Permissions = `Basic`
 
-	err = db.AddUser(u)
+	_, err = db.AddUser(u)
 	if err != nil{
 		//user exists
 		http.Error(w, fmt.Sprintf("Username exists :%s", u.Username), http.StatusConflict)

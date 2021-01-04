@@ -45,9 +45,8 @@ func (db *DB) UpdatePost (post types.Post) (types.Post,error) {
 
 func (db *DB) GetPostAll () ([]types.Post, error) {
 
-	tx := db.MustBegin()
 	var posts []types.Post
-	err := tx.Select(&posts, `
+	err := db.Select(&posts, `
 	SELECT
 	       post.post_id,
 	       post.user_id,
@@ -64,7 +63,7 @@ func (db *DB) GetPostAll () ([]types.Post, error) {
 	if err != nil {
 		return posts,err
 	}
-	err = tx.Commit()
+
 
 
 	return posts,err
@@ -74,10 +73,10 @@ func (db *DB) GetPostAll () ([]types.Post, error) {
 
 func (db *DB) GetPostByArea (post types.Post) ([]types.Post, error) {
 
-	tx := db.MustBegin()
+
 	var posts []types.Post
 
-	err := tx.Select(&posts, `
+	err := db.Select(&posts, `
 	SELECT
 	       post.post_id,
 	       post.user_id,
@@ -97,7 +96,6 @@ func (db *DB) GetPostByArea (post types.Post) ([]types.Post, error) {
 	if err != nil {
 		return posts,err
 	}
-	err = tx.Commit()
 
 	return posts,err
 
