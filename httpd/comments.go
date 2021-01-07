@@ -27,9 +27,17 @@ func RetrieveComment(w http.ResponseWriter, r *http.Request, db *db.DB) {
 
 	var c types.Comment
 	err := json.NewDecoder(r.Body).Decode(&c)
+	CommentIDstr := chi.URLParam(r, "CommentID")
+	CommentID,err := strconv.Atoi(CommentIDstr)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	c.CommentID = CommentID
 
 
-	search, err := db.GetComment(c)
+	c, err = db.GetComment(c)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -37,7 +45,7 @@ func RetrieveComment(w http.ResponseWriter, r *http.Request, db *db.DB) {
 	}
 
 
-	_ = json.NewEncoder(w).Encode(search)
+	_ = json.NewEncoder(w).Encode(c)
 }
 
 
@@ -55,12 +63,14 @@ func CreateComment(w http.ResponseWriter, r *http.Request, db *db.DB) {
 
 	c.UserID = JWTID
 
-	_, err = db.AddComment(c)
+	c, err = db.AddComment(c)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusConflict)
 		return
 	}
 
+
+	_ = json.NewEncoder(w).Encode(c)
 }
 
 
@@ -92,6 +102,8 @@ func UpdateComment(w http.ResponseWriter, r *http.Request, db *db.DB) {
 		http.Error(w, err.Error(), http.StatusConflict)
 		return
 	}
+
+	_ = json.NewEncoder(w).Encode(c)
 
 }
 

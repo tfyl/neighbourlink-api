@@ -43,8 +43,9 @@ CREATE TABLE IF NOT EXISTS user_attribute(
 
 
 CREATE TABLE IF NOT EXISTS post(
-	post_id          SERIAL PRIMARY KEY,
-	user_id          SERIAL REFERENCES user_detail(user_id),
+	post_id               SERIAL PRIMARY KEY,
+	user_id     	      SERIAL REFERENCES user_detail(user_id),
+	post_time 			  timestamp,
 	post_title            varchar ,
 	post_description      varchar,
 	post_urgency          varchar
@@ -53,7 +54,7 @@ CREATE TABLE IF NOT EXISTS post(
 CREATE TABLE IF NOT EXISTS post_comment(
 	comment_id       SERIAL PRIMARY KEY,
 	post_id          SERIAL REFERENCES post(post_id),
-	user_id          SERIAL ,
+	user_id          SERIAL REFERENCES user_detail(user_id) ,
 	comment_message  varchar
 );`
 

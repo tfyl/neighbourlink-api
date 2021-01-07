@@ -98,19 +98,41 @@ func (db *DB) GetCommentsByPost (post types.Post) ([]types.Comment, error) {
 
 
 
-func (db *DB) GetComment (comment types.Comment) (types.Comment, error) {
+func (db *DB) GetComment (c types.Comment) (types.Comment, error) {
 
-	err := db.Get(&comment, `
+
+	tx := db.MustBegin()
+	defer tx.Commit()
+
+	err := tx.QueryRowx(`
 	SELECT
-		*  
+		comment_id,
+	    user_id,
+	    comment_message
 	FROM
-	     post_comment
+		post_comment
 	WHERE
-		post_comment.comment_id=$1
-	;`, comment.CommentID)
+		comment_id = $1
+	;`,c.CommentID).StructScan(&c)
+	if err != nil{
+		//fmt.Println(1)
+		return c,err
+	}
 
+	err = tx.QueryRowx(`
+		SELECT
+			post_id
+		FROM
+		    post_comment
+		WHERE
+			post_comment.comment_id=$1
+		;`, c.CommentID).StructScan(&c.Post)
+	if err != nil{
+		//fmt.Println(3)
+		return c,err
+	}
 
-	return comment,err
+	return c,nil
 
 }
 
@@ -126,6 +148,7 @@ func (db *DB) UpdateComment (comment types.Comment) (types.Comment,error) {
 				comment_message = $1
 				WHERE
 				comment_id = $2`,
+				comment.CommentMessage,
 				comment.CommentID,
 	)
 	if err != nil {

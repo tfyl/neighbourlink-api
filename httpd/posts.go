@@ -96,11 +96,13 @@ func CreatePost(w http.ResponseWriter, r *http.Request, db *db.DB) {
 
 	p.UserID = JWTID
 
-	_, err = db.AddPost(p)
+	p, err = db.AddPost(p)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusConflict)
 		return
 	}
+
+	_ = json.NewEncoder(w).Encode(p)
 
 }
 
@@ -132,10 +134,11 @@ func UpdatePost(w http.ResponseWriter, r *http.Request, db *db.DB) {
 	p.UserID = JWTID
 	p.PostID = PostId
 
-	_, err = db.UpdatePost(p)
+	p, err = db.UpdatePost(p)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusConflict)
 		return
 	}
 
+	_ = json.NewEncoder(w).Encode(p)
 }

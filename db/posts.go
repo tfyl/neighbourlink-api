@@ -2,12 +2,13 @@ package db
 
 import (
 	"neighbourlink-api/types"
+	"time"
 )
 
 func (db *DB) AddPost (post types.Post) (types.Post,error) {
 
 	tx := db.MustBegin()
-	_ ,err  := tx.Exec(`INSERT INTO post(user_id,post_title,post_description,post_urgency) VALUES ($1,$2,$3,$4) `,post.UserID,post.Title,post.Description,post.Urgency)
+	_ ,err  := tx.Exec(`INSERT INTO post(user_id,post_time,post_title,post_description,post_urgency) VALUES ($1,$2,$3,$4,$5) `,post.UserID,time.Now(),post.Title,post.Description,post.Urgency)
 	if err != nil {
 		return post,err
 	}
@@ -26,7 +27,7 @@ func (db *DB) UpdatePost (post types.Post) (types.Post,error) {
 				post_title = $2,
 				post_description = $3,
 				post_urgency = $4
-				WHERE post_id = $5`,
+				WHERE post_id = $5;`,
 
 				post.UserID,
 				post.Title,
@@ -50,6 +51,8 @@ func (db *DB) GetPostAll () ([]types.Post, error) {
 	SELECT
 	       post.post_id,
 	       post.user_id,
+	       user_detail.username,
+	       post.post_time,
 	       post.post_title,
 	       post.post_description,
 	       post.post_urgency,
@@ -58,7 +61,10 @@ func (db *DB) GetPostAll () ([]types.Post, error) {
 	FROM
 	     post
 	
+	INNER JOIN user_detail ON post.user_id=user_detail.user_id
 	INNER JOIN user_attribute ON post.user_id=user_attribute.user_id
+
+	ORDER BY post.post_time DESC;
 	`, )
 	if err != nil {
 		return posts,err
@@ -80,6 +86,8 @@ func (db *DB) GetPostByArea (post types.Post) ([]types.Post, error) {
 	SELECT
 	       post.post_id,
 	       post.user_id,
+	       user_detail.username,
+	       post.post_time,
 	       post.post_title,
 	       post.post_description,
 	       post.post_urgency,
@@ -88,10 +96,13 @@ func (db *DB) GetPostByArea (post types.Post) ([]types.Post, error) {
 	FROM
 	     post
 	
+	INNER JOIN user_detail ON post.user_id=user_detail.user_id
 	INNER JOIN user_attribute ON post.user_id=user_attribute.user_id
 	
 	WHERE
-		user_attribute.local_area=$1;
+		user_attribute.local_area=$1
+
+	ORDER BY post.post_time DESC;
 	`, post.LocalArea)
 	if err != nil {
 		return posts,err
@@ -109,6 +120,8 @@ func (db *DB) GetPost (post types.Post) (types.Post, error) {
 	SELECT
 	       post.post_id,
 	       post.user_id,
+	       user_detail.username,
+	       post.post_time,
 	       post.post_title,
 	       post.post_description,
 	       post.post_urgency,
@@ -117,6 +130,7 @@ func (db *DB) GetPost (post types.Post) (types.Post, error) {
 	FROM
 	     post
 	
+	INNER JOIN user_detail ON post.user_id=user_detail.user_id
 	INNER JOIN user_attribute ON post.user_id=user_attribute.user_id
 	
 	WHERE

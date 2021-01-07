@@ -10,6 +10,7 @@ import (
 	"neighbourlink-api/types"
 	"net/http"
 	"regexp"
+	"strconv"
 	"time"
 )
 
@@ -57,9 +58,9 @@ func RetrieveUser(w http.ResponseWriter, r *http.Request, db *db.DB) {
 	//	t1 := time.Now()
 
 
-	Username := chi.URLParam(r, "Username")
+	UserIDs := chi.URLParam(r, "UserID")
 	var u types.User
-	switch Username {
+	switch UserIDs {
 	case "":
 		u = types.User{UserID: JWTUserID(r)}
 		u, _ = db.GetUserByID(u)
@@ -69,9 +70,18 @@ func RetrieveUser(w http.ResponseWriter, r *http.Request, db *db.DB) {
 		return
 
 	default:
-		u = types.User{Username: Username}
-		u, _ = db.GetUserByUsername(u)
+		UserID , err := strconv.Atoi(UserIDs)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 
+		u = types.User{UserID: UserID}
+		u, err := db.GetUserByID(u)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 		w.WriteHeader(http.StatusOK)
 		_ = json.NewEncoder(w).Encode(u.Data())
 		return
@@ -87,7 +97,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request, db *db.DB, secretKey []by
 	UserSearch,err := db.GetUserByUsername(u)
 
 	if err != nil{
-		http.Error(w, err.Error(), http.StatusConflict)
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 
