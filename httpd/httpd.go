@@ -6,6 +6,8 @@ import (
 	"github.com/go-chi/cors"
 	"log"
 	"neighbourlink-api/db"
+	"neighbourlink-api/httpd/admin"
+	"neighbourlink-api/httpd/middleware"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -49,7 +51,7 @@ func (s Server) Start () {
 				// Private routes
 				r.Group(func(r chi.Router) {
 					// Handle valid / invalid tokens
-					r.Use(func(handler http.Handler) http.Handler { return JWTAuthMiddleware(handler, s.secretKey) })
+					r.Use(func(handler http.Handler) http.Handler { return middleware.JWTAuthMiddleware(handler, s.secretKey) })
 					r.Post("/", func(w http.ResponseWriter, r *http.Request) { CreatePost(w, r, s.db) })          // POST  - create a new post
 					r.Patch("/{PostID}", func(w http.ResponseWriter, r *http.Request) { UpdatePost(w, r, s.db) }) // POST  - Update post
 				})
@@ -64,9 +66,9 @@ func (s Server) Start () {
 				// Private routes
 				r.Group(func(r chi.Router) {
 					// Handle valid / invalid tokens
-					r.Use(func(handler http.Handler) http.Handler { return JWTAuthMiddleware(handler, s.secretKey) })
+					r.Use(func(handler http.Handler) http.Handler { return middleware.JWTAuthMiddleware(handler, s.secretKey) })
 					r.Post("/", func(w http.ResponseWriter, r *http.Request) { CreateComment(w, r, s.db) })          // POST  - create a new comment
-					r.Patch("/{CommentID}", func(w http.ResponseWriter, r *http.Request) { UpdateComment(w, r, s.db) }) // POST  - Update post
+					r.Patch("/{CommentID}", func(w http.ResponseWriter, r *http.Request) { UpdateComment(w, r, s.db) }) // PATCH  - Update post
 				})
 
 			})
@@ -78,11 +80,15 @@ func (s Server) Start () {
 				//r.Use(func(handler http.Handler) http.Handler { return JWTAuthMiddleware(handler, s.secretKey) })
 				r.Get("/", func(w http.ResponseWriter, r *http.Request){ RetrieveUser(w,r,s.db) })
 				r.Get("/{UserID}", func(w http.ResponseWriter, r *http.Request){ RetrieveUser(w,r,s.db) })
-
+				r.Patch("/{UserID}", func(w http.ResponseWriter, r *http.Request){ UpdateUser(w,r,s.db) })
 			})
 		})
 		r.Route("/session", func(r chi.Router) {
 			r.Post("/", func(w http.ResponseWriter, r *http.Request){ LoginUser(w,r,s.db,s.secretKey) })
+		})
+		r.Route("/admin", func(r chi.Router) {
+			r.Use(func(handler http.Handler) http.Handler { return middleware.JWTAuthMiddleware(handler, s.secretKey) })
+			r.Get("/user", func(w http.ResponseWriter, r *http.Request){ admin.RetrieveAllUsers(w,r,s.db) })
 		})
 
 	})
@@ -113,7 +119,7 @@ func (s Server) Start () {
 //	})
 }
 
-// FileServer conveniently sets up a http.FileServer handler to serve
+// FileServer sets up a http.FileServer handler to serve
 // static files from a http.FileSystem.
 func FileServer(r chi.Router, path string, root http.FileSystem) {
 	if strings.ContainsAny(path, "{}*") {

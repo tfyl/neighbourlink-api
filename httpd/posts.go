@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi"
+	"neighbourlink-api/alg"
 	"neighbourlink-api/db"
+	"neighbourlink-api/httpd/middleware"
 	"neighbourlink-api/types"
 	"net/http"
 	"strconv"
@@ -39,18 +41,44 @@ func RetrieveAllPost(w http.ResponseWriter, r *http.Request, db *db.DB) {
 
 	}
 
+	cQueue := types.NewQueue()
 
 	// attach comments
-	for i,post := range search{
+	for _,post := range search{
 		comments, err := db.GetCommentsByPost(post)
 		if err != nil{
 			fmt.Println("httpd: RetrieveAllPost",err)
 			continue
 		}
-		search[i].Comments = comments
+
+		cQueue.Push(comments)
+
 	}
 
-	_ = json.NewEncoder(w).Encode(search)
+	queueLen := cQueue.Len()
+
+	for i:=0;i<queueLen;i++{
+		search[i].Comments = cQueue.Pop().([]types.Comment)
+	}
+
+	var nodes []*alg.Hnode
+	for _,p := range search{
+		nTime := alg.NormaliseTime(search[0].Time,p.Time)
+		nUrgency := alg.NormalisePriority(p.Urgency)
+		nodes = append(nodes, &alg.Hnode{Value: nUrgency*nTime, Data: p})
+	}
+
+	// creates new heap
+	heap := alg.NewHeap(nodes)
+	heap.Sort()  // sorts the object using the public method
+	nodes = heap.ReturnArray() // returns array of nodes
+
+	var OrderedP []types.Post
+	for _,n:= range nodes{
+		OrderedP = append(OrderedP, n.Data.(types.Post) )
+	}
+
+	_ = json.NewEncoder(w).Encode(OrderedP)
 }
 
 
@@ -85,7 +113,7 @@ func RetrievePost(w http.ResponseWriter, r *http.Request, db *db.DB) {
 func CreatePost(w http.ResponseWriter, r *http.Request, db *db.DB) {
 	var p types.Post
 
-	JWTID := JWTUserID(r)
+	JWTID := middleware.JWTUserID(r)
 
 
 	err := json.NewDecoder(r.Body).Decode(&p)
@@ -107,7 +135,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request, db *db.DB) {
 }
 
 func UpdatePost(w http.ResponseWriter, r *http.Request, db *db.DB) {
-	JWTID := JWTUserID(r)
+	JWTID := middleware.JWTUserID(r)
 
 	PostIdStr := chi.URLParam(r, "PostID")
 	PostId,err := strconv.Atoi(PostIdStr)

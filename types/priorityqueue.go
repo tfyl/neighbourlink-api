@@ -20,14 +20,14 @@ type PQueue struct {
 }
 
 
-func NewPQueue() *PQueue {
+func NewPQueue() *PQueue {   //initialise priority queue and return queue class
 	q := &PQueue{head:&pqnode{priority:math.MinInt64,next:&pqnode{priority:math.MinInt64}}}
 	q.mutex = &sync.Mutex{}
 	return q
 }
 
 
-func (q *PQueue) Push (i interface{},p int){
+func (q *PQueue) Push (i interface{},p int){   // push new item to queue (add to the tail/end)
 	q.l ++
 	q.mutex.Lock()
 	defer q.mutex.Unlock()
@@ -43,9 +43,9 @@ func (q *PQueue) Push (i interface{},p int){
 	c := q.head
 
 
-	// length has already increased by one so must start from i=1
-	for i := 1; i < q.l; i++ {
-		if c.next.priority < n.priority {
+	// length has already increased by one so must start from i=-1
+	for i := -1; i < q.l; i++ {
+		if c.next != nil && c.next.priority > n.priority {  // checks if the priority of the item is less than the next item, if so insert
 			n.next = c.next
 			c.next = n
 			break
@@ -62,15 +62,15 @@ func (q *PQueue) Push (i interface{},p int){
 }
 
 
-func (q *PQueue) Pop () (i interface{}){
+func (q *PQueue) Pop () (i interface{}){  // pop item off priority queue (from the front)
 	q.mutex.Lock()
 	defer q.mutex.Unlock()
 
 	if q.l == 0 {
 		return nil
 	}
-
-	i = q.head
+	//
+	i = q.head.next.next.data
 	q.head = q.head.next
 
 	q.l --
@@ -80,7 +80,7 @@ func (q *PQueue) Pop () (i interface{}){
 }
 
 
-func (q *PQueue) Peek () (i interface{}){
+func (q *PQueue) Peek () (i interface{}){  // peek item from priority queue (check first value without changing the data structure)
 	q.mutex.Lock()
 	defer q.mutex.Unlock()
 
@@ -94,7 +94,7 @@ func (q *PQueue) Peek () (i interface{}){
 }
 
 
-func (q *PQueue) Len () int {
+func (q *PQueue) Len () int {  // return length of data structure
 	q.mutex.Lock()
 	defer q.mutex.Unlock()
 	return q.l

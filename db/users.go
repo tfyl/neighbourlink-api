@@ -29,9 +29,9 @@ func (db *DB) AddUser (user types.User) (types.User, error) {
 
 
 
-func (db *DB) GetUserAll (user types.User) (types.User, error) {
-
-	err := db.Get(&user, `
+func (db *DB) GetUserAll () ([]types.User, error) {
+	var users []types.User
+	err := db.Select(&users, `
 	SELECT
 	       user_detail.user_id,
 	       user_detail.username,
@@ -48,10 +48,10 @@ func (db *DB) GetUserAll (user types.User) (types.User, error) {
 	INNER JOIN user_attribute ON user_detail.user_id=user_attribute.user_id
 	;`, )
 	if err != nil {
-		return user,err
+		return users,err
 	}
 
-	return user,err
+	return users,err
 
 }
 
@@ -114,6 +114,57 @@ func (db *DB) GetUserByUsername (user types.User) (types.User, error) {
 	if err != nil {
 		return user,err
 	}
+
+	return user,err
+
+}
+
+func (db *DB) UpdateUser (user types.User) (types.User, error) {
+
+
+
+	tx := db.MustBegin()
+	// update user_detail table
+	_ ,err  := tx.Exec(`
+		UPDATE 
+		        user_detail 
+		SET 
+		        username = $2,
+		        email = $3
+		WHERE
+				user_id = $1
+				`, user.UserID,user.Username,user.Email)
+	if err != nil {
+		return user,err
+	}
+	// update user_auth table
+	_ ,err  = tx.Exec(`
+		UPDATE 
+		        user_auth 
+		SET 
+		        password = $2,
+		        permissions = $3
+		WHERE
+				user_id = $1
+				`, user.UserID,user.Password,user.Permissions)
+	if err != nil {
+		return user,err
+	}
+	// update user_attribute table
+	_ ,err  = tx.Exec(`
+		UPDATE 
+		        user_attribute 
+		SET 
+		        local_area = $2,
+		        reputation = $3
+		WHERE
+				user_id = $1
+				`, user.UserID,user.LocalArea,user.Reputation)
+	if err != nil {
+		return user,err
+	}
+
+	err = tx.Commit()
 
 	return user,err
 

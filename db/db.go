@@ -35,12 +35,10 @@ CREATE TABLE IF NOT EXISTS user_attribute(
 	user_id SERIAL PRIMARY KEY,
 	local_area       varchar,
 	reputation       INT,
-
 	FOREIGN KEY(user_id) 
 	  REFERENCES user_detail(user_id)
 	  	ON DELETE CASCADE
 );
-
 
 CREATE TABLE IF NOT EXISTS post(
 	post_id               SERIAL PRIMARY KEY,

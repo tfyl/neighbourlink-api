@@ -17,14 +17,14 @@ type Queue struct {
 }
 
 
-func NewQueue() *Queue {
+func NewQueue() *Queue {    //initialise queue and return queue class
 	q := &Queue{}
 	q.mutex = &sync.Mutex{}
 	return q
 }
 
 
-func (q *Queue) Push (i interface{}){
+func (q *Queue) Push (i interface{}){  // push new item to queue (add to the tail/end)
 	q.mutex.Lock()
 	defer q.mutex.Unlock()
 
@@ -45,7 +45,7 @@ func (q *Queue) Push (i interface{}){
 }
 
 
-func (q *Queue) Pop () (i interface{}){
+func (q *Queue) Pop () (i interface{}){  // pop item off queue (from the front)
 	q.mutex.Lock()
 	defer q.mutex.Unlock()
 
@@ -53,7 +53,7 @@ func (q *Queue) Pop () (i interface{}){
 		return nil
 	}
 
-	i = q.head
+	i = q.head.data
 	q.head = q.head.next
 
 	q.l --
@@ -63,7 +63,7 @@ func (q *Queue) Pop () (i interface{}){
 }
 
 
-func (q *Queue) Peek () (i interface{}){
+func (q *Queue) Peek () (i interface{}){  // peek item on queue (check first value without changing the data structure)
 	q.mutex.Lock()
 	defer q.mutex.Unlock()
 
@@ -76,7 +76,7 @@ func (q *Queue) Peek () (i interface{}){
 }
 
 
-func (q *Queue) Len () int {
+func (q *Queue) Len () int { // return length of data structure
 	q.mutex.Lock()
 	defer q.mutex.Unlock()
 	return q.l

@@ -1,4 +1,4 @@
-package httpd
+package middleware
 
 import (
 	"context"

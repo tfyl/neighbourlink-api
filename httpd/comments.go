@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-chi/chi"
 	"neighbourlink-api/db"
+	"neighbourlink-api/httpd/middleware"
 	"neighbourlink-api/types"
 	"net/http"
 	"strconv"
@@ -36,7 +37,6 @@ func RetrieveComment(w http.ResponseWriter, r *http.Request, db *db.DB) {
 	}
 	c.CommentID = CommentID
 
-
 	c, err = db.GetComment(c)
 	if err != nil {
 		fmt.Println(err)
@@ -44,16 +44,13 @@ func RetrieveComment(w http.ResponseWriter, r *http.Request, db *db.DB) {
 		return
 	}
 
-
 	_ = json.NewEncoder(w).Encode(c)
 }
 
 
-
-
 func CreateComment(w http.ResponseWriter, r *http.Request, db *db.DB) {
 	var c types.Comment
-	JWTID := JWTUserID(r)
+	JWTID := middleware.JWTUserID(r)
 
 	err := json.NewDecoder(r.Body).Decode(&c)
 	if err != nil {
@@ -69,13 +66,12 @@ func CreateComment(w http.ResponseWriter, r *http.Request, db *db.DB) {
 		return
 	}
 
-
 	_ = json.NewEncoder(w).Encode(c)
 }
 
 
 func UpdateComment(w http.ResponseWriter, r *http.Request, db *db.DB) {
-	JWTID := JWTUserID(r)
+	JWTID := middleware.JWTUserID(r)
 
 	CommentIDStr := chi.URLParam(r, "CommentID")
 	CommentID,err := strconv.Atoi(CommentIDStr)

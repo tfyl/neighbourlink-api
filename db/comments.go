@@ -91,7 +91,6 @@ func (db *DB) GetCommentsByPost (post types.Post) ([]types.Comment, error) {
 		comments[i].Post.PostID = post.PostID
 	}
 
-	fmt.Println(comments)
 	return comments,nil
 }
 

@@ -7,6 +7,7 @@ import (
 	"github.com/alexedwards/argon2id"
 	"github.com/go-chi/chi"
 	"neighbourlink-api/db"
+	"neighbourlink-api/httpd/middleware"
 	"neighbourlink-api/types"
 	"net/http"
 	"regexp"
@@ -44,6 +45,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request, db *db.DB) {
 
 		return
 	}
+
 	w.WriteHeader(http.StatusCreated)
 	return
 	//  Used to	measure how long the function takes to run (part 2 of 2)
@@ -62,7 +64,7 @@ func RetrieveUser(w http.ResponseWriter, r *http.Request, db *db.DB) {
 	var u types.User
 	switch UserIDs {
 	case "":
-		u = types.User{UserID: JWTUserID(r)}
+		u = types.User{UserID: middleware.JWTUserID(r)}
 		u, _ = db.GetUserByID(u)
 
 		w.WriteHeader(http.StatusOK)
@@ -89,6 +91,49 @@ func RetrieveUser(w http.ResponseWriter, r *http.Request, db *db.DB) {
 }
 
 
+func UpdateUser(w http.ResponseWriter,r *http.Request,db *db.DB){
+	JWTID := middleware.JWTUserID(r) // gets user id from signed jwt cookie
+	JWTPermission := middleware.JWTPermission(r) // gets permission level of cookie using the middleware that is run for this request
+
+	UserIDstr := chi.URLParam(r, "UserID") // gets UserID taken from the url placeholder
+	UserID , err := strconv.Atoi(UserIDstr) // converts UserID from the into a integer
+
+	// Truth table
+	// user is if the authenticated user = user being modified
+	// admin is if the authenticated user has the permissions of an admin
+	// user | admin | desired | and | or  | nand  | nor
+	//   1  |   1   |    0    |  1  |  1  |   0   |  0
+	//   1  |   0   |    0    |  0  |  1  |   1   |  0
+	//   0  |   1   |    0    |  0  |  1  |   1   |  0
+	//   0  |   0   |    1    |  0  |  0  |   1   |  1
+	//   is desired result :  |  x  |  x  |   x   |  ✔
+
+	if !(UserID == JWTID || JWTPermission == `Admin`) {
+		http.Error(w, "user is not authorised to update", http.StatusUnauthorized)
+		return
+	}
+
+	u, err := db.GetUserByID(types.User{UserID:UserID}) // defines user object / struct as : "u" it gets current record of the user
+
+	err = json.NewDecoder(r.Body).Decode(&u) // decoding request body into the user object / struct
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	u.UserID = UserID
+
+	u, err = db.UpdateUser(u)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	_ = json.NewEncoder(w).Encode(u)
+
+}
+
+
 func LoginUser(w http.ResponseWriter, r *http.Request, db *db.DB, secretKey []byte) {
 
 	var u types.User
@@ -108,7 +153,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request, db *db.DB, secretKey []by
 	}
 
 	if check == true {
-		details ,_:= json.Marshal(UserSearch) // returns in []byte form
+		details ,_:= json.Marshal(UserSearch.Data()) // returns in []byte form
 		B64Details := base64.StdEncoding.EncodeToString(details)  // convert to Base64 as there are special characters that are not allowed to be in cookies
 		expiry := time.Now().Add(time.Hour * 24 * 7)
 
@@ -122,7 +167,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request, db *db.DB, secretKey []by
 		}
 
 		http.SetCookie(w, &detailsCookie)
-		SetJWTcookie(w, UserSearch, secretKey)
+		middleware.SetJWTcookie(w, UserSearch, secretKey)
 		return
 	} else {
 		http.Error(w, "Not Logged In!", 401)
