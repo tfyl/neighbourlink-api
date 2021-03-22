@@ -34,7 +34,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request, db *db.DB) {
 		return
 	}
 
-	u.Reputation = 0
+	u.Reputation = 1
 	u.Permissions = `Basic`
 
 	_, err = db.AddUser(u)
@@ -97,6 +97,10 @@ func UpdateUser(w http.ResponseWriter,r *http.Request,db *db.DB){
 
 	UserIDstr := chi.URLParam(r, "UserID") // gets UserID taken from the url placeholder
 	UserID , err := strconv.Atoi(UserIDstr) // converts UserID from the into a integer
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	// Truth table
 	// user is if the authenticated user = user being modified
@@ -113,9 +117,16 @@ func UpdateUser(w http.ResponseWriter,r *http.Request,db *db.DB){
 		return
 	}
 
-	u, err := db.GetUserByID(types.User{UserID:UserID}) // defines user object / struct as : "u" it gets current record of the user
+	originalUser, err := db.GetUserByID(types.User{UserID:UserID}) // defines user object / struct as : "u" ; it gets current record of the user from the user id provided
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-	err = json.NewDecoder(r.Body).Decode(&u) // decoding request body into the user object / struct
+	u := originalUser
+	fmt.Println(u)
+
+	err = json.NewDecoder(r.Body).Decode(&u) // decoding request body into the user object / struct (overriding the old attributes)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -123,13 +134,23 @@ func UpdateUser(w http.ResponseWriter,r *http.Request,db *db.DB){
 
 	u.UserID = UserID
 
+	if u.Password == ""{
+		u.Password = originalUser.Password
+	}
+	if JWTPermission != `Admin`{
+		u.Reputation = originalUser.Reputation // stop unauthorised `Basic` users changing reputation
+		u.LocalArea = originalUser.LocalArea
+	}
+
+
 	u, err = db.UpdateUser(u)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		fmt.Println(err.Error())
 		return
 	}
 
-	_ = json.NewEncoder(w).Encode(u)
+	_ = json.NewEncoder(w).Encode(u.Data())
 
 }
 

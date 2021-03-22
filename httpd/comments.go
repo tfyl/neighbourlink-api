@@ -59,7 +59,7 @@ func CreateComment(w http.ResponseWriter, r *http.Request, db *db.DB) {
 	}
 
 	c.UserID = JWTID
-
+	fmt.Println(c)
 	c, err = db.AddComment(c)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusConflict)

@@ -17,7 +17,7 @@ type UserAuth struct {
 
 type UserAttributes struct {
 	LocalArea  string `json:"local_area,omitempty" db:"local_area"`
-	Reputation int    `json:"reputation" db:"reputation"`
+	Reputation int    `json:"reputation,omitempty" db:"reputation"`
 }
 
 func (u *User) Data () User{

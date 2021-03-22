@@ -29,7 +29,6 @@ func New(db *db.DB) Server {
 
 func (s Server) Start () {
 	r := chi.NewRouter()
-
 	r.Use(cors.Handler(cors.Options{
 		// AllowedOrigins: []string{"https://foo.com"}, // Use this to allow specific origin hosts
 		AllowedOrigins:   []string{"*"},
@@ -58,6 +57,12 @@ func (s Server) Start () {
 
 			})
 		})
+		r.Route("/graph", func(r chi.Router) {
+			r.Group(func(r chi.Router) {
+				// Public routes
+				r.Get("/", func(w http.ResponseWriter, r *http.Request) { RetrieveShortestPath(w, r, s.db) })
+			})
+		})
 		r.Route("/comment", func(r chi.Router) {
 			r.Group(func(r chi.Router) {
 				// Public routes
@@ -75,12 +80,13 @@ func (s Server) Start () {
 		})
 		r.Route("/user", func(r chi.Router) {
 			r.Post("/", func(w http.ResponseWriter, r *http.Request){ CreateUser(w,r,s.db) })
+			r.Get("/{UserID}", func(w http.ResponseWriter, r *http.Request){ RetrieveUser(w,r,s.db) })  // doesn't use JWT Middleware
 			r.Group(func(r chi.Router) {
-				// Public routes
-				//r.Use(func(handler http.Handler) http.Handler { return JWTAuthMiddleware(handler, s.secretKey) })
-				r.Get("/", func(w http.ResponseWriter, r *http.Request){ RetrieveUser(w,r,s.db) })
-				r.Get("/{UserID}", func(w http.ResponseWriter, r *http.Request){ RetrieveUser(w,r,s.db) })
-				r.Patch("/{UserID}", func(w http.ResponseWriter, r *http.Request){ UpdateUser(w,r,s.db) })
+				r.Use(func(handler http.Handler) http.Handler { return middleware.JWTAuthMiddleware(handler, s.secretKey) })
+
+				r.Get("/", func(w http.ResponseWriter, r *http.Request){ RetrieveUser(w,r,s.db) }) // uses JWT middleware to determine authorised user and return data
+				r.Patch("/{UserID}", func(w http.ResponseWriter, r *http.Request){ UpdateUser(w,r,s.db) }) // updates user and thus must be protected by validating JWT Cookies
+				r.Delete("/{UserID}", func(w http.ResponseWriter, r *http.Request){ admin.DeleteUser(w,r,s.db) }) // delete user (must have auth level of `Admin`)
 			})
 		})
 		r.Route("/session", func(r chi.Router) {

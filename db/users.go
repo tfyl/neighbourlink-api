@@ -1,6 +1,8 @@
 package db
 
-import "neighbourlink-api/types"
+import (
+	"neighbourlink-api/types"
+)
 
 func (db *DB) AddUser (user types.User) (types.User, error) {
 
@@ -138,6 +140,7 @@ func (db *DB) UpdateUser (user types.User) (types.User, error) {
 		return user,err
 	}
 	// update user_auth table
+
 	_ ,err  = tx.Exec(`
 		UPDATE 
 		        user_auth 
@@ -160,6 +163,48 @@ func (db *DB) UpdateUser (user types.User) (types.User, error) {
 		WHERE
 				user_id = $1
 				`, user.UserID,user.LocalArea,user.Reputation)
+	if err != nil {
+		return user,err
+	}
+
+	err = tx.Commit()
+
+	return user,err
+
+}
+
+
+func (db *DB) DeleteUser (user types.User) (types.User, error) {
+
+	tx := db.MustBegin()
+	// update user_detail table
+	_ ,err  := tx.Exec(`
+		DELETE FROM 
+		        user_detail 
+		WHERE
+				user_id = $1
+				`, user.UserID)
+	if err != nil {
+		return user,err
+	}
+	// update user_auth table
+
+	_ ,err  = tx.Exec(`
+		DELETE FROM  
+		        user_auth 
+		WHERE
+				user_id = $1
+				`, user.UserID)
+	if err != nil {
+		return user,err
+	}
+	// update user_attribute table
+	_ ,err  = tx.Exec(`
+		DELETE FROM  
+		        user_attribute 
+		WHERE
+				user_id = $1
+				`, user.UserID)
 	if err != nil {
 		return user,err
 	}
