@@ -40,6 +40,9 @@ func (s Server) Start () {
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
 
+	r.Get("/", func(w http.ResponseWriter, r *http.Request){
+		http.Redirect(w, r, "/web/posts.html", http.StatusMovedPermanently)
+	})
 
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Route("/post", func(r chi.Router) {
