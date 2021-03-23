@@ -375,7 +375,7 @@
     $( "#submit" ).click(function() {
       var from = $(`#from`).val()
       var destination = $(`#destination`).val()
-      var endpoint = 'http://localhost/api/v1/graph/';
+      var endpoint = '/api/v1/graph/';
 
       method = "GET";
       jsonData = {"origin":from,"destination":destination}
