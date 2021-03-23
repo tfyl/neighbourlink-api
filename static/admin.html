@@ -99,7 +99,7 @@
 
       $.ajax({
         dataType: "json",
-        url: "http://localhost/api/v1/admin/user",
+        url: "/api/v1/admin/user",
         success: success
       });
 
@@ -119,7 +119,7 @@
        });
       $(document).on("click","#delete",function() {
         var jsonData = JSON.parse($(this).attr("data"));
-        var endpoint = 'http://localhost/api/v1/user/';
+        var endpoint = '/api/v1/user/';
         jsonData.user_id = Number(jsonData.user_id)
 
         method = "DELETE";
@@ -157,7 +157,7 @@
   </script>
   <script type="text/javascript">
     function updateUser() {
-        var endpoint = 'http://localhost/api/v1/user/';
+        var endpoint = '/api/v1/user/';
         var formArray = $('#updateUser').serializeArray();
         var formJSON = {};
 
