@@ -110,7 +110,7 @@
     };
 
     $(document).ready(function() {
-      var web_socket = new WebSocket("ws://localhost/api/v1/ws");
+      var web_socket = new WebSocket("wss://neighbourlink.xyz/api/v1/ws");
       web_socket.onmessage = function (event) {
         console.log(event.data);
         toastr.options.closeDuration = 3000;
