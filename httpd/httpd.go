@@ -119,7 +119,7 @@ func (s Server) Start () {
 	filesDir := http.Dir(filepath.Join(workDir, "./static"))
 	fmt.Println(filesDir)
 	FileServer(r, "/web/", filesDir)
-	log.Fatal(http.ListenAndServe(":81", r))
+	log.Fatal(http.ListenAndServe(":8080", r))
 
 //	r.Route("/api/v1" ,func(r chi.Router) {
 //		r.Route("/post", func(r chi.Router) {
