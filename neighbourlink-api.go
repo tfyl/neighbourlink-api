@@ -12,6 +12,4 @@ func main(){
 
 	s := httpd.New(db)
 	s.Start()
-
-
 }

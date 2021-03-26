@@ -43,7 +43,7 @@
   <!-- Navbar -->
   <nav id="navbar-main" class="navbar navbar-horizontal navbar-transparent navbar-main navbar-expand-lg navbar-light">
     <div class="container">
-      <a class="navbar-brand" href="pages/dashboards/dashboard.html">
+      <a class="navbar-brand" href="posts.html">
         <img src="assets/img/brand/white.png">
       </a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,7 +53,7 @@
         <div class="navbar-collapse-header">
           <div class="row">
             <div class="col-6 collapse-brand">
-              <a href="pages/dashboards/dashboard.html">
+              <a href="posts.html">
                 <img src="assets/img/brand/blue.png">
               </a>
             </div>
@@ -137,6 +137,49 @@
                 
               
             <script type="text/javascript">
+              function createSession() {
+                var endpoint = '/api/v1/session';
+                var formArray = $('#loginForm').serializeArray();
+                var formJSON = {};
+                var method = "POST";
+
+                $.map(formArray, function (n, i) {
+                  formJSON[n['name']] = n['value'];
+                });
+
+                function sleep(ms) {
+                  return new Promise(resolve => setTimeout(resolve, ms));
+                }
+
+
+                $.ajax({
+                  type: method,
+                  url: endpoint,
+                  data: JSON.stringify(formJSON),
+                  contentType: 'application/json',
+                  success: function () {
+                    //toastr.options.closeDuration = 3000;
+                    //toastr.success('Success Registeration', 'Please Login now');
+                    (async function () {
+                      toastr.options.closeDuration = 3000;
+                      toastr.success('Successful', 'Logging In');
+
+                      await sleep(1000);
+                      window.location.href = "posts.html";
+
+                    }())
+                  },
+                  error:function () {
+                    (async function () {
+                      toastr.options.closeDuration = 3000;
+                      toastr.error('Failure', 'Details Incorrect');
+
+
+                    }())
+                  },
+                });
+
+              }
                 function sleep(milliseconds) {
                   const date = Date.now();
                   let currentDate = null;
@@ -144,7 +187,7 @@
                     currentDate = Date.now();
                   } while (currentDate - date < milliseconds);
                 }
-                function createSession() {
+                function createUser() {
                     var endpoint = '/api/v1/user';
                     var formArray = $('#loginForm').serializeArray();
                     var formJSON = {};
@@ -172,7 +215,7 @@
                         toastr.success('Successful Registration', 'Logging In');
 
                         await sleep(1000);
-                        window.location.href = "login.html";
+                        createSession();
 
                       }())
                     }
@@ -223,7 +266,7 @@
                   </select>
                 </div>
                 <div class="text-center">
-                  <button type="button" onclick="createSession()" class="btn btn-primary my-4">Sign up</button>
+                  <button type="button" onclick="createUser()" class="btn btn-primary my-4">Sign up</button>
                 </div>
               </form>
             </div>

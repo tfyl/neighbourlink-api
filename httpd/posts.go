@@ -130,6 +130,8 @@ func CreatePost(w http.ResponseWriter, r *http.Request, db *db.DB) {
 		return
 	}
 
+	go alertPost(p,db)
+
 	_ = json.NewEncoder(w).Encode(p)
 
 }
@@ -168,5 +170,14 @@ func UpdatePost(w http.ResponseWriter, r *http.Request, db *db.DB) {
 		return
 	}
 
+	go alertPost(p,db)
+
 	_ = json.NewEncoder(w).Encode(p)
+}
+
+func alertPost(p types.Post,db *db.DB){
+	if p.Urgency == 5{
+		err := db.Websocket.SendAll(p)
+		fmt.Println("Error sending websocket",err)
+	}
 }

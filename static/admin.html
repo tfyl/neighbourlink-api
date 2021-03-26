@@ -33,7 +33,7 @@
     <!-- Core
   <script src="assets/vendor/jquery/dist/jquery.min.js"></script> -->
   <!-- handlebar -->
-  <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.6/handlebars.min.js" integrity="sha512-zT3zHcFYbQwjHdKjCu6OMmETx8fJA9S7E6W7kBeFxultf75OPTYUJigEKX58qgyQMi1m1EgenfjMXlRZG8BXaw==" crossorigin="anonymous"></script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.0/moment.min.js"></script>
@@ -211,7 +211,7 @@
     <div class="scrollbar-inner">
       <!-- Brand -->
       <div class="sidenav-header d-flex align-items-center">
-        <a class="navbar-brand" href="pages/dashboards/dashboard.html">
+        <a class="navbar-brand" href="posts.html">
           <img src="assets/img/brand/blue.png" class="navbar-brand-img" alt="...">
         </a>
         <div class="ml-auto">
@@ -269,11 +269,6 @@
                 </div>
               </div>
             </li>
-            <li class="nav-item d-sm-none">
-              <a class="nav-link" href="#" data-action="search-show" data-target="#navbar-search-main">
-                <i class="ni ni-zoom-split-in"></i>
-              </a>
-            </li>
 
 
           </ul>
@@ -292,7 +287,7 @@
                 <div class="dropdown-header noti-title">
                   <h6 class="text-overflow m-0">Welcome!</h6>
                 </div>
-                <a hidden href="admin.html" id="admin" class="dropdown-item">
+                <a href="admin.html" id="admin" class="dropdown-item">
                   <i class="ni ni-user-run"></i>
                   <span>Admin Panel</span>
                 </a>
@@ -313,8 +308,8 @@
               user = JSON.parse(atob(byteencoded));
               $('#username').text(user.username);
 
-              if (user.permissions == "Admin"){
-                $("#admin").show()
+              if (user.permissions != "Admin"){
+                $("#admin").hide()
               };
             </script>
           </ul>

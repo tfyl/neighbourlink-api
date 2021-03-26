@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"neighbourlink-api/types"
 )
 
 const connStr string = `host=ec2-54-247-125-38.eu-west-1.compute.amazonaws.com
@@ -76,13 +77,15 @@ func InitDB() *DB {
 		fmt.Println(err)
 	}
 
-	return &DB{*db}
+	webSocketMap := types.NewWebSocketMap()
 
+	return &DB{*db,webSocketMap}
 }
 
 
 type DB struct {
 	sqlx.DB
+	Websocket types.WebSocketMapStruct
 }
 
 // remove all tx for singular select

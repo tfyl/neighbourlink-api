@@ -110,7 +110,14 @@
     };
 
     $(document).ready(function() {
+      var web_socket = new WebSocket("ws://localhost/api/v1/ws");
+      web_socket.onmessage = function (event) {
+        console.log(event.data);
+        toastr.options.closeDuration = 3000;
+        const post = JSON.parse(event.data);
+        toastr.warning(`HIGH URGENCY!\nTitle: ${post.post_title}\nDescription: ${post.post_description}`, '!');
 
+      }
       $.ajax({
         dataType: "json",
         url: "/api/v1/post",
@@ -230,7 +237,7 @@
     <div class="scrollbar-inner">
       <!-- Brand -->
       <div class="sidenav-header d-flex align-items-center">
-        <a class="navbar-brand" href="pages/dashboards/dashboard.html">
+        <a class="navbar-brand" href="posts.html">
           <img src="assets/img/brand/blue.png" class="navbar-brand-img" alt="...">
         </a>
         <div class="ml-auto">
@@ -280,6 +287,15 @@
           <ul class="navbar-nav align-items-center ml-md-auto">
             <li class="nav-item d-xl-none">
               <!-- Sidenav toggler -->
+              <div class="pr-3 sidenav-toggler sidenav-toggler-dark" data-action="sidenav-pin" data-target="#sidenav-main">
+                <div class="sidenav-toggler-inner">
+                  <i class="sidenav-toggler-line"></i>
+                  <i class="sidenav-toggler-line"></i>
+                  <i class="sidenav-toggler-line"></i>
+                </div>
+              </div>
+            </li>
+
 
           </ul>
           <ul class="navbar-nav align-items-center ml-auto ml-md-0">
@@ -297,12 +313,10 @@
                 <div class="dropdown-header noti-title">
                   <h6 class="text-overflow m-0">Welcome!</h6>
                 </div>
-                <div  id="admin">
-                <a href="admin.html" class="dropdown-item">
-                  <i class="ni ni-settings-gear-65"></i>
+                <a href="admin.html" id="admin" class="dropdown-item">
+                  <i class="ni ni-user-run"></i>
                   <span>Admin Panel</span>
                 </a>
-                </div>
                 <div class="dropdown-divider"></div>
                 <a onclick="logout()" class="dropdown-item">
                   <i class="ni ni-user-run"></i>
@@ -311,25 +325,22 @@
               </div>
             </li>
             <script type="application/javascript">
-
-
               byteencoded = getCookie("Account");
               if (byteencoded == ""){
                 window.location.href = "/web/login.html";
 
-              }
-
+              };
+              console.log(byteencoded);
               user = JSON.parse(atob(byteencoded));
               $('#username').text(user.username);
-              console.log(user);
-              if (user.permissions != "Admin"){
-                console.log("not admin")
-                $("#admin").hide()
-              }
 
+              if (user.permissions != "Admin"){
+                $("#admin").hide()
+              };
             </script>
           </ul>
         </div>
+
       </div>
     </nav>
     <!-- Header -->

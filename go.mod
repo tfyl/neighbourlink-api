@@ -7,6 +7,7 @@ require (
 	github.com/brianvoe/sjwt v0.5.1
 	github.com/go-chi/chi v1.5.1
 	github.com/go-chi/cors v1.1.1
+	github.com/gorilla/websocket v1.4.2
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/lib/pq v1.0.0
 	google.golang.org/appengine v1.6.7 // indirect

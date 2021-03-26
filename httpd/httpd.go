@@ -43,6 +43,13 @@ func (s Server) Start () {
 	r.Get("/", func(w http.ResponseWriter, r *http.Request){
 		http.Redirect(w, r, "/web/posts.html", http.StatusMovedPermanently)
 	})
+	r.Get(`/{^[a-zA-Z]*\.html}`, func(w http.ResponseWriter, r *http.Request){
+		http.Redirect(w, r, "/web/posts.html", http.StatusMovedPermanently)
+	})
+	r.Get(`/web/`, func(w http.ResponseWriter, r *http.Request){
+		http.Redirect(w, r, "/web/posts.html", http.StatusMovedPermanently)
+	})
+
 
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Route("/post", func(r chi.Router) {
@@ -98,6 +105,12 @@ func (s Server) Start () {
 		r.Route("/admin", func(r chi.Router) {
 			r.Use(func(handler http.Handler) http.Handler { return middleware.JWTAuthMiddleware(handler, s.secretKey) })
 			r.Get("/user", func(w http.ResponseWriter, r *http.Request){ admin.RetrieveAllUsers(w,r,s.db) })
+		})
+		r.Route("/ws", func(r chi.Router) {
+			r.Group(func(r chi.Router) {
+				r.Use(func(handler http.Handler) http.Handler { return middleware.JWTAuthMiddleware(handler, s.secretKey) })
+				r.Get("/", func(w http.ResponseWriter, r *http.Request) { serveWs(w, r, s.db) })
+			})
 		})
 
 	})
