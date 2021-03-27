@@ -8,7 +8,7 @@ import (
 )
 
 type WebSocketMapStruct struct {
-	m map[int]*SyncCon  // [accountID] to SyncCon
+	m map[*SyncCon]int  // [*SyncCon] to AccountID
 	s sync.RWMutex
 }
 
@@ -19,13 +19,7 @@ type SyncCon struct {
 
 func (webmap *WebSocketMapStruct) AddConn (accountID int,websocket *websocket.Conn){
 	webmap.s.Lock()
-	webmap.m[accountID] = &SyncCon{websocket,sync.Mutex{}}
-	webmap.s.Unlock()
-}
-
-func (webmap *WebSocketMapStruct) DeleteConn (accountID int){
-	webmap.s.Lock()
-	delete(webmap.m,accountID)
+	webmap.m[&SyncCon{websocket,sync.Mutex{}}] = accountID
 	webmap.s.Unlock()
 }
 
@@ -36,7 +30,7 @@ func (webmap *WebSocketMapStruct) SendAll (post Post) error {
 	if err != nil{
 		return err
 	}
-	for _,conn := range webmap.m {
+	for conn,_ := range webmap.m {
 		conn.Lock()
 		err := conn.WriteMessage(1,postByte)
 		conn.Unlock( )
@@ -51,6 +45,6 @@ func (webmap *WebSocketMapStruct) SendAll (post Post) error {
 }
 
 func NewWebSocketMap() (WebSocketMap WebSocketMapStruct) {
-	WebSocketMap.m = make(map[int]*SyncCon)
+	WebSocketMap.m = make(map[*SyncCon]int)
 	return WebSocketMap
 }
