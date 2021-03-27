@@ -87,7 +87,21 @@
 
   
   <script type="text/javascript">
+    var getUrlParameter = function getUrlParameter(sParam) {
+      var sPageURL = window.location.search.substring(1),
+              sURLVariables = sPageURL.split('&'),
+              sParameterName,
+              i;
 
+      for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+
+        if (sParameterName[0] === sParam) {
+          return typeof sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+        }
+      }
+      return false;
+    };
     function logout() {
 
       var cookies = Cookies.get();
@@ -122,10 +136,15 @@
           await sleep(2000);
           location.reload();
         }())
-      }
+      };
+      var endpoint = "/api/v1/post";
+      var area = getUrlParameter("local_area")
+      if (area != false){
+        endpoint = endpoint+ `?local_area+${encodeURIComponent(area)}`
+      };
       $.ajax({
         dataType: "json",
-        url: "/api/v1/post",
+        url: endpoint,
         success: success
       });
 
