@@ -78,9 +78,9 @@
        user = JSON.parse(atob(byteencoded));
        var arg2 = user.user_id;
        var check = arg1 === arg2;
-       if (user.permissions === "Admin"){
-         check = true;
-       }
+       //if (user.permissions === "Admin"){
+         //check = true;
+       //}
        return (check) ? options.fn(this) : options.inverse(this);
      });
      Handlebars.registerHelper('json', function(context) {
