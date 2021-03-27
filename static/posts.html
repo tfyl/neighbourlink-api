@@ -87,6 +87,16 @@
 
   
   <script type="text/javascript">
+    function updateQueryStringParameter(uri, key, value) {
+      var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+      var separator = uri.indexOf('?') !== -1 ? "&" : "?";
+      if (uri.match(re)) {
+        return uri.replace(re, '$1' + key + "=" + value + '$2');
+      }
+      else {
+        return uri + separator + key + "=" + value;
+      }
+    }
     var getUrlParameter = function getUrlParameter(sParam) {
       var sPageURL = window.location.search.substring(1),
               sURLVariables = sPageURL.split('&'),
@@ -375,6 +385,42 @@
       <div class="row">
 
           <div class="col-xl-4">
+            <!-- filters -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="mb-0">Area Filter</h3>
+              </div>
+              <div class="card-body">
+                <div class="container">
+                <div class='row'>
+                  <div class='col-xs-12 button-wrapper'>
+                    <button type="button" class="btn btn-primary myButton" href="?local_area=Camden">Camden</button>
+                    <button type="button" class="btn btn-primary myButton" href="?local_area=Islington">Islington</button>
+                    <button type="button" class="btn btn-primary myButton" href="?local_area=Hackney">Hackney</button>
+                    <button type="button" class="btn btn-primary myButton" href="?local_area=Kensington%20and%20Chelsea">Kensington and Chelsea</button>
+                    <button type="button" class="btn btn-primary myButton" href="?local_area=Westminster">Westminster</button>
+                    <button type="button" class="btn btn-primary myButton" href="?local_area=City%20of%20London">City of London</button>
+                    <button type="button" class="btn btn-primary myButton" href="?local_area=Tower%20Hamlets">Tower Hamlets</button>
+                    <button type="button" class="btn btn-primary myButton" href="?local_area=Southwark">Southwark</button>
+                    <button type="button" class="btn btn-warning myButton" href="?">Clear</button>
+                  </div>
+                </div>
+                </div>
+              </div>
+            </div>
+            <script type="application/javascript">
+              $('.myButton').on('click', function(e) {
+
+                e.preventDefault();
+
+                var href = $(this).attr('href');
+
+                var newHref = location.protocol + '//' + location.host + location.pathname+href
+
+                window.location.href = newHref;
+              });
+            </script>
+
                       <!-- Textareas -->
             <div class="card">
               <!-- Card header -->
@@ -411,6 +457,7 @@
               </div>
 
             </div>
+
         </div>
 
          <div class="col-xl-8" id="posts">
