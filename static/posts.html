@@ -140,7 +140,7 @@
       var endpoint = "/api/v1/post";
       var area = getUrlParameter("local_area")
       if (area != false){
-        endpoint = endpoint+ `?local_area+${encodeURIComponent(area)}`
+        endpoint = endpoint+ `?local_area=${encodeURIComponent(area)}`
       };
       $.ajax({
         dataType: "json",
