@@ -6,11 +6,13 @@ import (
 )
 
 func (db *DB) CalculatePath (origin, destination string) (cost int,path []string,err error){
+	// gets all posts from database
 	posts,err := db.GetPostAll()
 	if err != nil{
 		return 0, nil, nil
 	}
 
+	// makes a map and initialises the weighting
 	areas := make(map[string]int)
 	areas["Camden"] = 1
 	areas["Islington"] = 1
@@ -27,7 +29,9 @@ func (db *DB) CalculatePath (origin, destination string) (cost int,path []string
 	}
 
 	g:= dijkstra.NewGraph()
+	// creates new graph
 
+	// Adds all the edges for the different areas of london (8 of which are currently supported at the moment)
 	g.AddEdge(alg.Weight(areas,"Camden","Islington"))
 	g.AddEdge(alg.Weight(areas,"Camden","Westminster"))
 	g.AddEdge(alg.Weight(areas,"Camden","City of London"))
@@ -60,6 +64,7 @@ func (db *DB) CalculatePath (origin, destination string) (cost int,path []string
 	g.AddEdge(alg.Weight(areas,"Southwark","City of London"))
 	g.AddEdge(alg.Weight(areas,"Southwark","Tower Hamlets"))
 
+	// gets the path and cost from the origin to destination
 	cost,path = g.GetPath(origin,destination)
 	return
 }

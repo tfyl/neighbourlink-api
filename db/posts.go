@@ -47,6 +47,8 @@ func (db *DB) UpdatePost (post types.Post) (types.Post,error) {
 func (db *DB) GetPostAll () ([]types.Post, error) {
 
 	var posts []types.Post
+	// creates variable posts which is an array of the type types.Post
+
 	err := db.Select(&posts, `
 	SELECT
 	       post.post_id,
@@ -65,7 +67,9 @@ func (db *DB) GetPostAll () ([]types.Post, error) {
 	INNER JOIN user_attribute ON post.user_id=user_attribute.user_id
 
 	ORDER BY post.post_time DESC;
-	`, )
+	`, )// Returns posts ordered by time descending
+	// Performs inner join to get the corresponding record from user_detail and user_attribute
+
 	if err != nil {
 		return posts,err
 	}
@@ -81,6 +85,7 @@ func (db *DB) GetPostByArea (post types.Post) ([]types.Post, error) {
 
 
 	var posts []types.Post
+	// creates variable posts which is an array of the type types.Post
 
 	err := db.Select(&posts, `
 	SELECT
@@ -103,7 +108,8 @@ func (db *DB) GetPostByArea (post types.Post) ([]types.Post, error) {
 		user_attribute.local_area=$1
 
 	ORDER BY post.post_time DESC;
-	`, post.LocalArea)
+	`, post.LocalArea) // Returns posts ordered by time descending
+	// Performs inner join to get the corresponding record from user_detail and user_attribute
 	if err != nil {
 		return posts,err
 	}
@@ -114,7 +120,7 @@ func (db *DB) GetPostByArea (post types.Post) ([]types.Post, error) {
 
 
 func (db *DB) GetPost (post types.Post) (types.Post, error) {
-
+	// One singular post using post_id
 	tx := db.MustBegin()
 	err := tx.Get(&post, `
 	SELECT
@@ -135,7 +141,8 @@ func (db *DB) GetPost (post types.Post) (types.Post, error) {
 	
 	WHERE
 		post.post_id=$1;
-	`, post.PostID)
+	`, post.PostID) // Gets post by checking post_id
+	// Performs inner join to get the corresponding record from user_detail and user_attribute
 	if err != nil {
 		return post,err
 	}

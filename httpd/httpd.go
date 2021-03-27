@@ -30,9 +30,7 @@ func New(db *db.DB) Server {
 func (s Server) Start () {
 	r := chi.NewRouter()
 	r.Use(cors.Handler(cors.Options{
-		// AllowedOrigins: []string{"https://foo.com"}, // Use this to allow specific origin hosts
 		AllowedOrigins:   []string{"*"},
-		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
@@ -40,6 +38,7 @@ func (s Server) Start () {
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
 
+	// redirects any urls to the correct frontend
 	r.Get("/", func(w http.ResponseWriter, r *http.Request){
 		http.Redirect(w, r, "/web/posts.html", http.StatusMovedPermanently)
 	})
@@ -50,64 +49,91 @@ func (s Server) Start () {
 		http.Redirect(w, r, "/web/posts.html", http.StatusMovedPermanently)
 	})
 
-
+	// api routes
 	r.Route("/api/v1", func(r chi.Router) {
+		// REST endpoint for post
 		r.Route("/post", func(r chi.Router) {
+			// Public routes
 			r.Group(func(r chi.Router) {
-				// Public routes
+				// GET - retrieves all the posts
 				r.Get("/", func(w http.ResponseWriter, r *http.Request) { RetrieveAllPost(w, r, s.db) })
+				// GET - retrieves the post with the specific post id
 				r.Get("/{PostID}", func(w http.ResponseWriter, r *http.Request) { RetrievePost(w, r, s.db) })
-				// Private routes
+
+				// Private routes (requires the user to be logged in)
 				r.Group(func(r chi.Router) {
-					// Handle valid / invalid tokens
+					// Checks JWT value by running the middleware
 					r.Use(func(handler http.Handler) http.Handler { return middleware.JWTAuthMiddleware(handler, s.secretKey) })
-					r.Post("/", func(w http.ResponseWriter, r *http.Request) { CreatePost(w, r, s.db) })          // POST  - create a new post
-					r.Patch("/{PostID}", func(w http.ResponseWriter, r *http.Request) { UpdatePost(w, r, s.db) }) // POST  - Update post
+					// POST  - create a new post
+					r.Post("/", func(w http.ResponseWriter, r *http.Request) { CreatePost(w, r, s.db) })
+					// PATCH  - Update post
+					r.Patch("/{PostID}", func(w http.ResponseWriter, r *http.Request) { UpdatePost(w, r, s.db) })
 				})
 
 			})
 		})
 		r.Route("/graph", func(r chi.Router) {
+			// Public routes
 			r.Group(func(r chi.Router) {
-				// Public routes
+				// GET - retrieves the shortest (safest) path between two points
 				r.Get("/", func(w http.ResponseWriter, r *http.Request) { RetrieveShortestPath(w, r, s.db) })
 			})
 		})
 		r.Route("/comment", func(r chi.Router) {
+			// Public routes
 			r.Group(func(r chi.Router) {
-				// Public routes
+				// GET - retrieves all the comments
 				r.Get("/", func(w http.ResponseWriter, r *http.Request) { RetrieveAllComments(w, r, s.db) })
+				// GET - retrieves the comment with the specific comment id
 				r.Get("/{CommentID}", func(w http.ResponseWriter, r *http.Request) { RetrieveComment(w, r, s.db) })
+
 				// Private routes
 				r.Group(func(r chi.Router) {
-					// Handle valid / invalid tokens
+					// Checks JWT value by running the middleware
 					r.Use(func(handler http.Handler) http.Handler { return middleware.JWTAuthMiddleware(handler, s.secretKey) })
-					r.Post("/", func(w http.ResponseWriter, r *http.Request) { CreateComment(w, r, s.db) })          // POST  - create a new comment
-					r.Patch("/{CommentID}", func(w http.ResponseWriter, r *http.Request) { UpdateComment(w, r, s.db) }) // PATCH  - Update post
+					// POST  - create a new comment
+					r.Post("/", func(w http.ResponseWriter, r *http.Request) { CreateComment(w, r, s.db) })
+					// PATCH  - Update post
+					r.Patch("/{CommentID}", func(w http.ResponseWriter, r *http.Request) { UpdateComment(w, r, s.db) })
 				})
 
 			})
 		})
+		// Public routes
 		r.Route("/user", func(r chi.Router) {
-			r.Post("/", func(w http.ResponseWriter, r *http.Request){ CreateUser(w,r,s.db) })
-			r.Get("/{UserID}", func(w http.ResponseWriter, r *http.Request){ RetrieveUser(w,r,s.db) })  // doesn't use JWT Middleware
-			r.Group(func(r chi.Router) {
-				r.Use(func(handler http.Handler) http.Handler { return middleware.JWTAuthMiddleware(handler, s.secretKey) })
 
-				r.Get("/", func(w http.ResponseWriter, r *http.Request){ RetrieveUser(w,r,s.db) }) // uses JWT middleware to determine authorised user and return data
-				r.Patch("/{UserID}", func(w http.ResponseWriter, r *http.Request){ UpdateUser(w,r,s.db) }) // updates user and thus must be protected by validating JWT Cookies
-				r.Delete("/{UserID}", func(w http.ResponseWriter, r *http.Request){ admin.DeleteUser(w,r,s.db) }) // delete user (must have auth level of `Admin`)
+			r.Post("/", func(w http.ResponseWriter, r *http.Request){ CreateUser(w,r,s.db) })
+			r.Get("/{UserID}", func(w http.ResponseWriter, r *http.Request){ RetrieveUser(w,r,s.db) })
+
+			// Private routes
+			r.Group(func(r chi.Router) {
+				// Checks JWT value by running the middleware
+				r.Use(func(handler http.Handler) http.Handler { return middleware.JWTAuthMiddleware(handler, s.secretKey) })
+				// GET - uses JWT middleware to determine authorised user and return data for that specific user
+				r.Get("/", func(w http.ResponseWriter, r *http.Request){ RetrieveUser(w,r,s.db) })
+				// PATCH - updates user and thus must be protected by validating JWT Cookies
+				r.Patch("/{UserID}", func(w http.ResponseWriter, r *http.Request){ UpdateUser(w,r,s.db) })
+				// DELETE - delete user (must have auth level of `Admin`)
+				r.Delete("/{UserID}", func(w http.ResponseWriter, r *http.Request){ admin.DeleteUser(w,r,s.db) })
 			})
 		})
+
+		// endpoint to handle sessions - public so users can authenticate
 		r.Route("/session", func(r chi.Router) {
+			// POST - create session (login) using auth
 			r.Post("/", func(w http.ResponseWriter, r *http.Request){ LoginUser(w,r,s.db,s.secretKey) })
 		})
+
+		// endpoint for admin functions - private
 		r.Route("/admin", func(r chi.Router) {
+			// Checks JWT value by running the middleware
 			r.Use(func(handler http.Handler) http.Handler { return middleware.JWTAuthMiddleware(handler, s.secretKey) })
+			// GET - Gets all users so they can perform admin functions
 			r.Get("/user", func(w http.ResponseWriter, r *http.Request){ admin.RetrieveAllUsers(w,r,s.db) })
 		})
 		r.Route("/ws", func(r chi.Router) {
 			r.Group(func(r chi.Router) {
+				// Checks JWT value by running the middleware
 				r.Use(func(handler http.Handler) http.Handler { return middleware.JWTAuthMiddleware(handler, s.secretKey) })
 				r.Get("/", func(w http.ResponseWriter, r *http.Request) { serveWs(w, r, s.db) })
 			})
@@ -120,32 +146,13 @@ func (s Server) Start () {
 	fmt.Println(filesDir)
 	FileServer(r, "/web/", filesDir)
 	log.Fatal(http.ListenAndServe(":8080", r))
-
-//	r.Route("/api/v1" ,func(r chi.Router) {
-//		r.Route("/post", func(r chi.Router) {
-//			r.Get("/", func(w http.ResponseWriter, r *http.Request) { post.RequestPost(w, r, s.db) }) // change func to get all posts
-//			r.Post("/", func(w http.ResponseWriter, r *http.Request) { post.AddPost(w, r, db, secretKey) })
-//			r.Get("/{PostID}", func(w http.ResponseWriter, r *http.Request) { post.RequestPost(w, r, db) })
-//			r.Put("/{PostID}", func(w http.ResponseWriter, r *http.Request) { post.RequestPost(w, r, db) }) // change func to update
-//			r.Get("/{PostID}", func(w http.ResponseWriter, r *http.Request) { post.RequestPost(w, r, db) }) // change func to get a specific post
-//		})
-//		r.Route("/account", func(r chi.Router) {
-//			r.Get("/", func(w http.ResponseWriter, r *http.Request) { auth.AccountInfo(w, r, db,secretKey) })
-//			r.Post("/signup", func(w http.ResponseWriter, r *http.Request) { auth.Signup(w, r, db) })
-//			r.Post("/login", func(w http.ResponseWriter, r *http.Request) { auth.Login(w, r, db, secretKey) })
-//			r.Post("/testJWT", func(w http.ResponseWriter, r *http.Request) { auth.ValidateJWT(w, r, secretKey) })
-//		})
-//		r.Route("/area", func(r chi.Router) {
-//			r.Post("/calcPath", func(w http.ResponseWriter, r *http.Request) { calcpath.ShortestPath(w, r) })
-//		})
-//	})
 }
 
 // FileServer sets up a http.FileServer handler to serve
 // static files from a http.FileSystem.
 func FileServer(r chi.Router, path string, root http.FileSystem) {
 	if strings.ContainsAny(path, "{}*") {
-		panic("FileServer does not permit any URL parameters.")
+		fmt.Println("FileServer does not permit any URL parameters.")
 	}
 
 	if path != "/" && path[len(path)-1] != '/' {

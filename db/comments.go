@@ -6,28 +6,31 @@ import (
 )
 
 func (db *DB) AddComment (comment types.Comment) (types.Comment,error) {
-
+	// adds comment to database
 	tx := db.MustBegin()
+	// starts a transaction so data collisions don't occur
 	_ ,err  := tx.Exec(`INSERT INTO post_comment(post_id,user_id,comment_message) VALUES ($1,$2,$3) `,comment.Post.PostID,comment.UserID,comment.CommentMessage)
 	if err != nil {
 		return comment, err
 	}
 
+	// commits the transaction
 	err = tx.Commit()
 	return comment, err
 }
 
 
 func (db *DB) GetCommentAll () ([]types.Comment, error) {
-
+	// gets all comments for all posts
 	var comments []types.Comment
 
-	tx := db.MustBegin()
+	tx := db.MustBegin() // starts 2 transactions for both processes that are carried out
 	tx1 := db.MustBegin()
-	defer tx.Commit()
+	defer tx.Commit()  // defers the commit (defer means that the command executes after the function returns and is finished)
 	defer tx1.Commit()
 
-	rows, err := tx.Queryx(`
+
+	rows, err := tx.Queryx(` 
 	SELECT
 		comment_id,
 	    user_id,
@@ -35,6 +38,7 @@ func (db *DB) GetCommentAll () ([]types.Comment, error) {
 	FROM
 		post_comment
 	;`)
+	// this query gets all the comments
 	if err != nil{
 		fmt.Println(1)
 		return nil,err
@@ -56,6 +60,8 @@ func (db *DB) GetCommentAll () ([]types.Comment, error) {
 		WHERE
 			post_comment.comment_id=$1
 		;`, c.CommentID).StructScan(&c.Post)
+		// this query attaches the post_id to the comment as it's stored in another child object
+
 		if err != nil{
 			fmt.Println(3)
 			return nil,err
@@ -68,7 +74,7 @@ func (db *DB) GetCommentAll () ([]types.Comment, error) {
 }
 
 func (db *DB) GetCommentsByPost (post types.Post) ([]types.Comment, error) {
-
+	// gets all comments specific to a post
 	var comments []types.Comment
 
 
@@ -82,6 +88,7 @@ func (db *DB) GetCommentsByPost (post types.Post) ([]types.Comment, error) {
 	WHERE
 		post_comment.post_id=$1
 	;`,post.PostID)
+	// gets all comments that have the post_id desired
 
 	if err != nil{
 		return nil,err
@@ -90,6 +97,7 @@ func (db *DB) GetCommentsByPost (post types.Post) ([]types.Comment, error) {
 	for i,_ := range comments{
 		comments[i].Post.PostID = post.PostID
 	}
+	// attaches post_id to the comments
 
 	return comments,nil
 }

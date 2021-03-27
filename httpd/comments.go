@@ -12,14 +12,16 @@ import (
 )
 
 func RetrieveAllComments(w http.ResponseWriter, r *http.Request, db *db.DB) {
+	// returns all comments in json form
 
-	search, err := db.GetCommentAll()
+	search, err := db.GetCommentAll() // gets list of comments
 	if err != nil {
 		fmt.Println(err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest) // if there is an error return 400 error
 		return
 	}
 
+	// if all is successful return all comments
 	_ = json.NewEncoder(w).Encode(search)
 }
 
@@ -78,10 +80,10 @@ func UpdateComment(w http.ResponseWriter, r *http.Request, db *db.DB) {
 
 	var c types.Comment
 
-	//if c.UserID != JWTID{
-	//	http.Error(w,fmt.Sprintf("UserID does not match logged in user Post:%d JWT:%d",p.UserID,JWTID),http.StatusUnauthorized)
-	//	return
-	//}
+	if c.UserID != JWTID{
+		http.Error(w,fmt.Sprintf("UserID does not match logged in user Post:%d JWT:%d",p.UserID,JWTID),http.StatusUnauthorized)
+		return
+	}
 
 	err = json.NewDecoder(r.Body).Decode(&c)
 	if err != nil {

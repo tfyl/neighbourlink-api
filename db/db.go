@@ -65,27 +65,28 @@ CREATE TABLE IF NOT EXISTS post_comment(
 	  REFERENCES user_detail(user_id)
 	  	ON DELETE CASCADE
 );`
+// Fully Normalised Schema for PostgreSQL table
 
 
 func InitDB() *DB {
-	var db, err = sqlx.Open("postgres", connStr)
+	// initialises database
+	var db, err = sqlx.Open("postgres", connStr) // opens connection to the postgres server
 	if err != nil{
 		fmt.Println(err)
 	}
-	_ , err= db.Exec(schema)
+	_ , err= db.Exec(schema) // executes the schema (only creates table "IF NOT EXISTS")
 	if err != nil{
 		fmt.Println(err)
 	}
 
-	webSocketMap := types.NewWebSocketMap()
+	webSocketMap := types.NewWebSocketMap() // creates a map/dictionary of all websockets
 
-	return &DB{*db,webSocketMap}
+	return &DB{DB:*db,Websocket:webSocketMap} // returns the DB type
 }
 
 
 type DB struct {
-	sqlx.DB
-	Websocket types.WebSocketMapStruct
+	sqlx.DB // DB structure contains a connection to the database
+	Websocket types.WebSocketMapStruct // contains a custom structure to hold the websocket connections
 }
 
-// remove all tx for singular select

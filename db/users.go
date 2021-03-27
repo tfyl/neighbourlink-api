@@ -5,7 +5,7 @@ import (
 )
 
 func (db *DB) AddUser (user types.User) (types.User, error) {
-
+	// Add user to database
 	tx := db.MustBegin()
 	_ ,err  := tx.Exec(`
 		WITH ins1 AS (
@@ -32,6 +32,7 @@ func (db *DB) AddUser (user types.User) (types.User, error) {
 
 
 func (db *DB) GetUserAll () ([]types.User, error) {
+	// get all users from database and return a list
 	var users []types.User
 	err := db.Select(&users, `
 	SELECT
@@ -49,17 +50,17 @@ func (db *DB) GetUserAll () ([]types.User, error) {
 	INNER JOIN user_auth ON user_detail.user_id=user_auth.user_id
 	INNER JOIN user_attribute ON user_detail.user_id=user_attribute.user_id
 	;`, )
+	// using INNER JOIN to combine the tables user_auth and user_attributes to user_detail
 	if err != nil {
 		return users,err
 	}
-
 	return users,err
 
 }
 
 
 func (db *DB) GetUserByID (user types.User) (types.User, error) {
-
+	// get one single user by their user_id
 
 	err := db.Get(&user, `
 	SELECT
@@ -91,7 +92,7 @@ func (db *DB) GetUserByID (user types.User) (types.User, error) {
 }
 
 func (db *DB) GetUserByUsername (user types.User) (types.User, error) {
-
+	// get a user by their username
 	err := db.Get(&user, `
 	SELECT
 	       user_detail.user_id,
@@ -122,8 +123,7 @@ func (db *DB) GetUserByUsername (user types.User) (types.User, error) {
 }
 
 func (db *DB) UpdateUser (user types.User) (types.User, error) {
-
-
+	// update user with the new information
 
 	tx := db.MustBegin()
 	// update user_detail table
@@ -175,9 +175,10 @@ func (db *DB) UpdateUser (user types.User) (types.User, error) {
 
 
 func (db *DB) DeleteUser (user types.User) (types.User, error) {
-
+	// delete user from database
 	tx := db.MustBegin()
-	// update user_detail table
+	// start transactions to stop collisions
+	// delete from user_detail table
 	_ ,err  := tx.Exec(`
 		DELETE FROM 
 		        user_detail 
@@ -187,7 +188,7 @@ func (db *DB) DeleteUser (user types.User) (types.User, error) {
 	if err != nil {
 		return user,err
 	}
-	// update user_auth table
+	// delete from user_auth table
 
 	_ ,err  = tx.Exec(`
 		DELETE FROM  
@@ -198,7 +199,7 @@ func (db *DB) DeleteUser (user types.User) (types.User, error) {
 	if err != nil {
 		return user,err
 	}
-	// update user_attribute table
+	// delete from user_attribute table
 	_ ,err  = tx.Exec(`
 		DELETE FROM  
 		        user_attribute 
@@ -210,6 +211,7 @@ func (db *DB) DeleteUser (user types.User) (types.User, error) {
 	}
 
 	err = tx.Commit()
+	// commit transaction
 
 	return user,err
 

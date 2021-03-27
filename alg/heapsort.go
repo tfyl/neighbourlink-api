@@ -7,6 +7,7 @@ type heap struct {
 }
 
 func NewHeap(arr []*Hnode) *heap {
+	// Creates new heap object
 	return &heap{
 		array: arr,
 	}
@@ -14,6 +15,7 @@ func NewHeap(arr []*Hnode) *heap {
 }
 
 type Hnode struct {
+	// The "Class" definition for each Heap Node
 	Value float64
 	Data interface{}
 }
@@ -53,19 +55,19 @@ func (h *heap) heapifyDown(current int, size int) { // heapify down function tha
 	}
 	smallest := current
 
-	leftChildIndex := h.lChildIndex(current)
-	rightRightIndex := h.rChildIndex(current)
+	leftChildIndex := h.lChildIndex(current) // gets index of the left child
+	rightRightIndex := h.rChildIndex(current)// gets index of the right child
 
-	if leftChildIndex < size && h.lChildValue(current) < h.array[smallest].Value {
+	if leftChildIndex < size && h.lChildValue(current) < h.array[smallest].Value { // compares the values of the left child to the smallest in array
 		smallest = leftChildIndex
 	}
-	if rightRightIndex < size && h.rChildValue(current) < h.array[smallest].Value {
+	if rightRightIndex < size && h.rChildValue(current) < h.array[smallest].Value { // compares the values of the right child to the smallest in array
 		smallest = rightRightIndex
 	}
 
-	if smallest != current {
-		h.swap(current, smallest)
-		h.heapifyDown(smallest, size)
+	if smallest != current { // if it hasn't reached the smallest node it hasn't finished
+		h.swap(current, smallest)   // swaps the current and the smallest node
+		h.heapifyDown(smallest, size)  // calls the same function (recursion)
 	}
 
 	return
@@ -93,6 +95,6 @@ func (h *heap) Print() { // prints array
 	}
 }
 
-func (h *heap) ReturnArray() []*Hnode {  // returns sorted array
+func (h *heap) ReturnArray() []*Hnode {  // returns array
 	return h.array
 }
