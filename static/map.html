@@ -211,23 +211,24 @@
               <li class="nav-item dropdown">
                 <a class="nav-link pr-0" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   <div class="media align-items-center">
-
-                    <div class="media-body ml-2 d-none d-lg-block">
-                      <span class="mb-0 text-sm  font-weight-bold" id="username">John Snow</span>
+                    <div class="media align-items-center">
+                  <span class="avatar avatar-sm rounded-circle">
+                    <img alt="Image placeholder" src="assets/img/icons/extra/user.jpg">
+                  </span>
+                      <div class="media-body ml-2 d-none d-lg-block">
+                        <span class="mb-0 text-sm  font-weight-bold" id="username">John Snow</span>
+                      </div>
                     </div>
-
                   </div>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right">
                   <div class="dropdown-header noti-title">
                     <h6 class="text-overflow m-0">Welcome!</h6>
                   </div>
-                  <div  id="admin">
-                    <a href="admin.html" class="dropdown-item">
-                      <i class="ni ni-settings-gear-65"></i>
-                      <span>Admin Panel</span>
-                    </a>
-                  </div>
+                  <a href="admin.html" id="admin" class="dropdown-item">
+                    <i class="ni ni-user-run"></i>
+                    <span>Admin Panel</span>
+                  </a>
                   <div class="dropdown-divider"></div>
                   <a onclick="logout()" class="dropdown-item">
                     <i class="ni ni-user-run"></i>
@@ -236,22 +237,18 @@
                 </div>
               </li>
               <script type="application/javascript">
-
-
                 byteencoded = getCookie("Account");
                 if (byteencoded == ""){
                   window.location.href = "/web/login.html";
 
-                }
-
+                };
+                console.log(byteencoded);
                 user = JSON.parse(atob(byteencoded));
                 $('#username').text(user.username);
-                console.log(user);
-                if (user.permissions != "Admin"){
-                  console.log("not admin")
-                  $("#admin").hide()
-                }
 
+                if (user.permissions != "Admin"){
+                  $("#admin").hide()
+                };
               </script>
             </ul>
         </div>
