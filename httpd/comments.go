@@ -80,12 +80,13 @@ func UpdateComment(w http.ResponseWriter, r *http.Request, db *db.DB) {
 
 	var c types.Comment
 
+	err = json.NewDecoder(r.Body).Decode(&c)
+
 	if c.UserID != JWTID{
-		http.Error(w,fmt.Sprintf("UserID does not match logged in user Post:%d JWT:%d",p.UserID,JWTID),http.StatusUnauthorized)
+		http.Error(w,fmt.Sprintf("UserID does not match logged in user Post:%d JWT:%d",c.UserID,JWTID),http.StatusUnauthorized)
 		return
 	}
 
-	err = json.NewDecoder(r.Body).Decode(&c)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
