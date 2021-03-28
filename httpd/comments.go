@@ -104,28 +104,3 @@ func UpdateComment(w http.ResponseWriter, r *http.Request, db *db.DB) {
 	_ = json.NewEncoder(w).Encode(c)
 
 }
-
-
-
-
-
-
-
-
-// Not part of a RESTful API
-//
-//func RetrieveCommentsByPost(w http.ResponseWriter, r *http.Request, db *db.DB) {
-
-//	var p types.Post
-//	err := json.NewDecoder(r.Body).Decode(&p)
-//
-//
-//	search, err := db.GetCommentsByPost(p)
-//	if err != nil {
-//		fmt.Println(err)
-//		http.Error(w, err.Error(), http.StatusBadRequest)
-//		return
-//	}
-//
-//	_ = json.NewEncoder(w).Encode(search)
-//}
