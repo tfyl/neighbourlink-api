@@ -121,7 +121,7 @@ func (s Server) Start () {
 		// endpoint to handle sessions - public so users can authenticate
 		r.Route("/session", func(r chi.Router) {
 			// POST - create session (login) using auth
-			r.Post("/", func(w http.ResponseWriter, r *http.Request){ LoginUser(w,r,s.db,s.secretKey) })
+			r.Post("/", func(w http.ResponseWriter, r *http.Request){ CreateSession(w,r,s.db,s.secretKey) })
 		})
 
 		// endpoint for admin functions - private
@@ -131,20 +131,25 @@ func (s Server) Start () {
 			// GET - Gets all users so they can perform admin functions
 			r.Get("/user", func(w http.ResponseWriter, r *http.Request){ admin.RetrieveAllUsers(w,r,s.db) })
 		})
+
+		// endpoint for websockets - private
 		r.Route("/ws", func(r chi.Router) {
 			r.Group(func(r chi.Router) {
 				// Checks JWT value by running the middleware
 				r.Use(func(handler http.Handler) http.Handler { return middleware.JWTAuthMiddleware(handler, s.secretKey) })
+				// GET - starts the websocket connection
 				r.Get("/", func(w http.ResponseWriter, r *http.Request) { serveWs(w, r, s.db) })
 			})
 		})
 
 	})
-
+	// get working directory
 	workDir, _ := os.Getwd()
+	// get filepath of static file structure
 	filesDir := http.Dir(filepath.Join(workDir, "./static"))
-	fmt.Println(filesDir)
+	// mount directory on /web/ subfolder
 	FileServer(r, "/web/", filesDir)
+	// serve http server on port 8080
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
 

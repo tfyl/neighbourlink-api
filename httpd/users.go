@@ -1,7 +1,6 @@
 package httpd
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/alexedwards/argon2id"
@@ -12,7 +11,6 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
-	"time"
 )
 
 func CreateUser(w http.ResponseWriter, r *http.Request, db *db.DB) {
@@ -26,26 +24,32 @@ func CreateUser(w http.ResponseWriter, r *http.Request, db *db.DB) {
 	PasswordHash, err := argon2id.CreateHash(u.Password, argon2id.DefaultParams)
 	u.Password = PasswordHash
 
+	// compiles regex to check email
 	re := regexp.MustCompile(`^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$`)
+	// checks if email matches compiled regex
 	if re.MatchString(u.Email) == false{
+		// returns error if the input is not valid
 		w.WriteHeader(422)
 		http.Error(w, fmt.Sprintf("Email Is Not Valid: %s", u.Email), http.StatusBadRequest)
 		fmt.Printf("User tried to make an account with a Email that does not match regex. Email:%s | Username:%s", u.Email, u.Email)
 		return
 	}
-
+	// set user reputation to 1 when signing up
 	u.Reputation = 1
+	// set user permissions to basic when signing up (i.e. not Admin or Moderator)
 	u.Permissions = `Basic`
 
+	// adds user to database
 	_, err = db.AddUser(u)
 	if err != nil{
-		//user exists
+		//user exists return error
 		http.Error(w, fmt.Sprintf("Username exists :%s", u.Username), http.StatusConflict)
 		fmt.Printf("User tried to make an account with a Email that already exists. Email:%s | Username:%s", u.Email, u.Username)
 
 		return
 	}
 
+	// sets 301 created header
 	w.WriteHeader(http.StatusCreated)
 	return
 	//  Used to	measure how long the function takes to run (part 2 of 2)
@@ -56,22 +60,25 @@ func CreateUser(w http.ResponseWriter, r *http.Request, db *db.DB) {
 }
 
 func RetrieveUser(w http.ResponseWriter, r *http.Request, db *db.DB) {
-	//  Used to	measure how long the function takes to run (part 1 of 2)
-	//	t1 := time.Now()
-
-
+	// gets url parameter user id
 	UserIDs := chi.URLParam(r, "UserID")
 	var u types.User
+	// if user id is not present it will return the details for the currently logged in user
 	switch UserIDs {
+	// user id is empty
 	case "":
+		// get the user id of the currently authenticated user
 		u = types.User{UserID: middleware.JWTUserID(r)}
+		// get user from database by id
 		u, _ = db.GetUserByID(u)
-
 		w.WriteHeader(http.StatusOK)
+		// return the user in json form (sanitised)
 		_ = json.NewEncoder(w).Encode(u.Data())
 		return
 
+	// user id is present
 	default:
+		// converts user id to a int
 		UserID , err := strconv.Atoi(UserIDs)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -79,12 +86,14 @@ func RetrieveUser(w http.ResponseWriter, r *http.Request, db *db.DB) {
 		}
 
 		u = types.User{UserID: UserID}
+		// gets user data
 		u, err := db.GetUserByID(u)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
+		// return the user in json form (sanitised)
 		_ = json.NewEncoder(w).Encode(u.Data())
 		return
 	}
@@ -151,50 +160,6 @@ func UpdateUser(w http.ResponseWriter,r *http.Request,db *db.DB){
 	}
 
 	_ = json.NewEncoder(w).Encode(u.Data())
-
-}
-
-
-func LoginUser(w http.ResponseWriter, r *http.Request, db *db.DB, secretKey []byte) {
-
-	var u types.User
-	err := json.NewDecoder(r.Body).Decode(&u)
-
-	UserSearch,err := db.GetUserByUsername(u)
-
-	if err != nil{
-		http.Error(w, err.Error(), http.StatusUnauthorized)
-		return
-	}
-
-	check, err := argon2id.ComparePasswordAndHash(u.Password, UserSearch.Password)
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	if check == true {
-		details ,_:= json.Marshal(UserSearch.Data()) // returns in []byte form
-		B64Details := base64.StdEncoding.EncodeToString(details)  // convert to Base64 as there are special characters that are not allowed to be in cookies
-		expiry := time.Now().Add(time.Hour * 24 * 7)
-
-		// fmt.Println(string(details))  // need to cast to string to print
-
-		detailsCookie := http.Cookie{
-			Name:    "Account",
-			Value:   B64Details,
-			Expires: expiry,
-			Path: "/",
-		}
-
-		http.SetCookie(w, &detailsCookie)
-		middleware.SetJWTcookie(w, UserSearch, secretKey)
-		return
-	} else {
-		http.Error(w, "Not Logged In!", 401)
-		return
-	}
-
 
 }
 
