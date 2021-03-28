@@ -218,7 +218,15 @@
                         createSession();
 
                       }())
-                    }
+
+                    },
+                    error:function () {
+                      (async function () {
+                        toastr.options.closeDuration = 3000;
+                        toastr.error('Failure', 'Details do not match requirement');
+
+
+                      }())
                   });
 
                     
