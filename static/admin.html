@@ -108,7 +108,7 @@
 
          var keysData = Object.keys(jsonData);
          console.log("keys",keysData)
-         for (i = 0; i < keysData.length; i++){
+         for (var i = 0; i < keysData.length; i++){
            var inp = document.getElementById(keysData[i])
            console.log(inp)
            if (inp == null){
@@ -281,7 +281,7 @@
                     <img alt="Image placeholder" src="assets/img/icons/extra/user.jpg">
                   </span>
                     <div class="media-body ml-2 d-none d-lg-block">
-                      <span class="mb-0 text-sm  font-weight-bold" id="username">John Snow</span>
+                      <span class="mb-0 text-sm  font-weight-bold" id="nav-username">John Snow</span>
                     </div>
                   </div>
                 </div>
@@ -309,7 +309,7 @@
               };
               console.log(byteencoded);
               user = JSON.parse(atob(byteencoded));
-              $('#username').text(user.username);
+              $('#nav-username').text(user.username);
 
               if (user.permissions != "Admin"){
                 $("#admin").hide()
