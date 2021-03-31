@@ -18,7 +18,7 @@
 - Client <-> Server
     - [Server](https://github.com/tfyl/neighbourlink-api/blob/main/httpd/httpd.go)
     - [Client](https://github.com/tfyl/neighbourlink-api/tree/main/static)
-- Use of manual cookie cookie creation along with HMAC Signing
+- Use of manual cookie creation along with HMAC Signing
     - [1](https://github.com/tfyl/neighbourlink-api/blob/main/httpd/middleware/auth.go)
     - [2](https://github.com/tfyl/neighbourlink-api/blob/main/httpd/session.go)
 
