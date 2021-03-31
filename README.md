@@ -26,7 +26,7 @@
 - [Websocket Implementation](https://github.com/tfyl/neighbourlink-api/blob/main/types/websocket.go)  
 - [User Class](https://github.com/tfyl/neighbourlink-api/blob/main/types/user.go)
 
-### DB Class: 
+### DB Class Containing Complex SQL: 
 - [Main](https://github.com/tfyl/neighbourlink-api/blob/main/db/db.go)  
 - [Post Data](https://github.com/tfyl/neighbourlink-api/blob/main/db/posts.go)   
 - [Comment Data](https://github.com/tfyl/neighbourlink-api/blob/main/db/comments.go)  
