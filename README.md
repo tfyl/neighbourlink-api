@@ -9,7 +9,7 @@
 [Dijkstra's Algorithm Part 1 (Class/Struct)](https://github.com/tfyl/neighbourlink-api/blob/main/types/dijkstra/dijkstra.go)  
 [Dijkstra's Algorithm Part 2 (Class/Struct)](https://github.com/tfyl/neighbourlink-api/blob/main/types/dijkstra/heap.go)  
 [Heap Sort (Class)](https://github.com/tfyl/neighbourlink-api/blob/main/alg/heapsort.go)  
-[Advance Mathematical Models](https://github.com/tfyl/neighbourlink-api/blob/main/alg/normalise.go)  
+[Advanced Mathematical Models](https://github.com/tfyl/neighbourlink-api/blob/main/alg/normalise.go)  
 
 ## Classes:   
 [Websocket Implementation](https://github.com/tfyl/neighbourlink-api/blob/main/types/websocket.go)  
