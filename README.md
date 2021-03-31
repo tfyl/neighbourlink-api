@@ -12,11 +12,11 @@
 - [Advanced Mathematical Models](https://github.com/tfyl/neighbourlink-api/blob/main/alg/normalise.go)  
 
 ## Web Routing
-
+- [Router/Endpoint Configuration](https://github.com/tfyl/neighbourlink-api/blob/main/httpd/httpd.go)
 
 ## Classes:   
-[Websocket Implementation](https://github.com/tfyl/neighbourlink-api/blob/main/types/websocket.go)  
-[User Class](https://github.com/tfyl/neighbourlink-api/blob/main/types/user.go)
+- [Websocket Implementation](https://github.com/tfyl/neighbourlink-api/blob/main/types/websocket.go)  
+- [User Class](https://github.com/tfyl/neighbourlink-api/blob/main/types/user.go)
 
 ### DB Class: 
 - [Main](https://github.com/tfyl/neighbourlink-api/blob/main/db/db.go)  
