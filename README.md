@@ -1,6 +1,6 @@
 # neighbourlink-api
 
-# Index:
+# Band A Index:
 
 ## Data Structures And Algorithms:
 - [Priority Queue (Class/Struct)](https://github.com/tfyl/neighbourlink-api/blob/main/types/priorityqueue.go)  
@@ -12,7 +12,15 @@
 - [Advanced Mathematical Models](https://github.com/tfyl/neighbourlink-api/blob/main/alg/normalise.go)  
 
 ## Web Routing
-- [Router/Endpoint Configuration](https://github.com/tfyl/neighbourlink-api/blob/main/httpd/httpd.go)
+- [Endpoint Configuration](https://github.com/tfyl/neighbourlink-api/blob/main/httpd/httpd.go)
+- [Direct File Access to static directory](https://github.com/tfyl/neighbourlink-api/tree/main/static)
+- [Advanced HTTP request Routing](https://github.com/tfyl/neighbourlink-api/blob/main/httpd/middleware/auth.go)
+- Client <-> Server
+    - [Server](https://github.com/tfyl/neighbourlink-api/blob/main/httpd/httpd.go)
+    - [Client](https://github.com/tfyl/neighbourlink-api/tree/main/static)
+- Use of manual cookie cookie creation along with HMAC Signing
+    - [1](https://github.com/tfyl/neighbourlink-api/blob/main/httpd/middleware/auth.go)
+    - [2](https://github.com/tfyl/neighbourlink-api/blob/main/httpd/session.go)
 
 ## Classes:   
 - [Websocket Implementation](https://github.com/tfyl/neighbourlink-api/blob/main/types/websocket.go)  
