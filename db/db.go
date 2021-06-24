@@ -7,12 +7,12 @@ import (
 	"neighbourlink-api/types"
 )
 
-const connStr string = `host=ec2-54-247-125-38.eu-west-1.compute.amazonaws.com
+const connStr string = `host=
 				user=ofeewfrhqunjte
-				password=027b9aec6e5217b1d8a64183bfa85e4af64b22b43c366011339ad42856b1de50
-				port=5432
-				dbname=d27bhqu6jrkt4h
-				sslmode=require`
+				password=
+				port=
+				dbname=
+				sslmode=`
 
 //noinspection SqlNoDataSourceInspection
 var schema = `
